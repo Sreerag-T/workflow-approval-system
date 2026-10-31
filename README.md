@@ -1,3 +1,10 @@
+**Live demo:** https://workflow-approval-system-eight.vercel.app
+**API docs (Swagger):** https://workflow-approval-system-9qsq.onrender.com/api-docs
+**Demo logins:** admin@axentriq.com, manager@axentriq.com, finance@axentriq.com, employee@axentriq.com (password `Password@123`)
+
+> Hosted on free tiers: the first request can take about 50 seconds while the server wakes up.
+
+
 # Axentriq Flow - Dynamic Workflow Approval Management System
 
 Employees raise Leave, Purchase, Expense and WFH requests. Approvals are routed automatically through **workflows that the
