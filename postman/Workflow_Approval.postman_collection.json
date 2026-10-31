@@ -1,0 +1,959 @@
+{
+  "info": {
+    "name": "Workflow Approval Management System",
+    "description": "Run \"POST /auth/login\" first - the token is stored automatically. Demo logins: admin@ / manager@ / finance@ / employee@axentriq.com, password Password@123",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST /auth/login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ],
+              "variable": []
+            },
+            "description": "Login and receive a JWT\n\nAccess: Public",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@axentriq.com\",\n  \"password\": \"Password@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.token) pm.collectionVariables.set('token', j.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /auth/me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ],
+              "variable": []
+            },
+            "description": "Current user profile\n\nAccess: Any authenticated user"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "GET /dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard"
+              ],
+              "variable": []
+            },
+            "description": "Statistics, charts data, my pending tasks and recent activity (scoped by role)\n\nAccess: Any authenticated user"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Requests",
+      "item": [
+        {
+          "name": "GET /requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requests"
+              ],
+              "variable": []
+            },
+            "description": "List requests (query: status, type, q, mine, page, limit). Employees see only their own\n\nAccess: Any authenticated user"
+          }
+        },
+        {
+          "name": "POST /requests",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requests"
+              ],
+              "variable": []
+            },
+            "description": "Create a draft request\n\nAccess: Any authenticated user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"request_type_id\": 2,\n  \"title\": \"Laptop for design team\",\n  \"description\": \"Need 2 laptops\",\n  \"amount\": 45000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET /requests/{id}",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/requests/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requests",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Request detail with approval instances, history, attachments and permissions\n\nAccess: Any authenticated user"
+          }
+        },
+        {
+          "name": "PUT /requests/{id}",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/requests/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requests",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Edit a DRAFT / CHANGES_REQUESTED request (owner only)\n\nAccess: Employee",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"request_type_id\": 2,\n  \"title\": \"Laptop for design team\",\n  \"amount\": 52000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST /requests/{id}/submit",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/requests/:id/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requests",
+                ":id",
+                "submit"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Submit (or re-submit) - selects the matching workflow and starts a new approval cycle\n\nAccess: Any authenticated user"
+          }
+        },
+        {
+          "name": "POST /requests/{id}/cancel",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/requests/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requests",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Cancel an eligible request (owner only)\n\nAccess: Any authenticated user"
+          }
+        },
+        {
+          "name": "POST /requests/{id}/attachments",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/requests/:id/attachments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requests",
+                ":id",
+                "attachments"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Upload up to 5 supporting documents (multipart field \"files\")\n\nAccess: Any authenticated user",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files",
+                  "type": "file"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE /requests/{id}/attachments/{attId}",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/requests/:id/attachments/:attId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requests",
+                ":id",
+                "attachments",
+                ":attId"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                },
+                {
+                  "key": "attId",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Remove an attachment from an editable request\n\nAccess: Any authenticated user"
+          }
+        },
+        {
+          "name": "GET /requests/{id}/attachments/{attId}/download",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/requests/:id/attachments/:attId/download",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "requests",
+                ":id",
+                "attachments",
+                ":attId",
+                "download"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                },
+                {
+                  "key": "attId",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Download an attachment\n\nAccess: Any authenticated user"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Approvals",
+      "item": [
+        {
+          "name": "GET /approvals/pending",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/approvals/pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "approvals",
+                "pending"
+              ],
+              "variable": []
+            },
+            "description": "Pending approval tasks assigned to me\n\nAccess: Approver, Super Admin"
+          }
+        },
+        {
+          "name": "GET /approvals/history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/approvals/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "approvals",
+                "history"
+              ],
+              "variable": []
+            },
+            "description": "Actions I have taken\n\nAccess: Approver, Super Admin"
+          }
+        },
+        {
+          "name": "POST /approvals/{id}/action",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/approvals/:id/action",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "approvals",
+                ":id",
+                "action"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Approve / reject / request changes on an approval instance (comments mandatory for reject & changes)\n\nAccess: Approver, Super Admin",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"APPROVED\",\n  \"comments\": \"Looks good\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST /approvals/escalate-now",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/approvals/escalate-now",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "approvals",
+                "escalate-now"
+              ],
+              "variable": []
+            },
+            "description": "Run the SLA escalation job immediately\n\nAccess: Super Admin"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Workflows",
+      "item": [
+        {
+          "name": "GET /workflows",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/workflows",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "workflows"
+              ],
+              "variable": []
+            },
+            "description": "List workflows with their current version, conditions and steps\n\nAccess: Super Admin"
+          }
+        },
+        {
+          "name": "POST /workflows",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/workflows",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "workflows"
+              ],
+              "variable": []
+            },
+            "description": "Create a workflow (version 1)\n\nAccess: Super Admin",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"request_type_id\": 2,\n  \"name\": \"Purchase above 50k\",\n  \"priority\": 10,\n  \"is_active\": true,\n  \"conditions\": [\n    {\n      \"field\": \"amount\",\n      \"operator\": \"gte\",\n      \"value\": 50000\n    }\n  ],\n  \"steps\": [\n    {\n      \"name\": \"Manager\",\n      \"approver_type\": \"MANAGER\"\n    },\n    {\n      \"name\": \"Finance\",\n      \"approver_type\": \"USER\",\n      \"approver_user_id\": 3,\n      \"escalation_hours\": 24\n    },\n    {\n      \"name\": \"Super Admin\",\n      \"approver_type\": \"ROLE\",\n      \"approver_role_id\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PUT /workflows/{id}",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/workflows/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "workflows",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Edit a workflow - creates a NEW version; submitted requests keep their version\n\nAccess: Super Admin",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"request_type_id\": 2,\n  \"name\": \"Purchase above 50k\",\n  \"priority\": 10,\n  \"is_active\": true,\n  \"conditions\": [\n    {\n      \"field\": \"amount\",\n      \"operator\": \"gte\",\n      \"value\": 50000\n    }\n  ],\n  \"steps\": [\n    {\n      \"name\": \"Manager\",\n      \"approver_type\": \"MANAGER\"\n    },\n    {\n      \"name\": \"Super Admin\",\n      \"approver_type\": \"ROLE\",\n      \"approver_role_id\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH /workflows/{id}/status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/workflows/:id/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "workflows",
+                ":id",
+                "status"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Activate / deactivate a workflow\n\nAccess: Super Admin",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_active\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET /workflows/{id}/versions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/workflows/:id/versions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "workflows",
+                ":id",
+                "versions"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Version history with number of requests pinned to each version\n\nAccess: Super Admin"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Request Types",
+      "item": [
+        {
+          "name": "GET /request-types",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/request-types",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "request-types"
+              ],
+              "variable": []
+            },
+            "description": "List request types (inactive ones only for Super Admin)\n\nAccess: Any authenticated user"
+          }
+        },
+        {
+          "name": "POST /request-types",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/request-types",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "request-types"
+              ],
+              "variable": []
+            },
+            "description": "Create a request type\n\nAccess: Super Admin",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Travel Request\",\n  \"code\": \"TRAVEL\",\n  \"requires_amount\": true,\n  \"requires_dates\": true,\n  \"is_active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PUT /request-types/{id}",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/request-types/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "request-types",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Update a request type\n\nAccess: Super Admin",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Travel Request\",\n  \"code\": \"TRAVEL\",\n  \"requires_amount\": true,\n  \"requires_dates\": true,\n  \"is_active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "GET /users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "variable": []
+            },
+            "description": "List users\n\nAccess: Super Admin"
+          }
+        },
+        {
+          "name": "GET /users/roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/roles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "roles"
+              ],
+              "variable": []
+            },
+            "description": "List roles\n\nAccess: Super Admin"
+          }
+        },
+        {
+          "name": "POST /users",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "variable": []
+            },
+            "description": "Create a user\n\nAccess: Super Admin",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Employee\",\n  \"email\": \"new@axentriq.com\",\n  \"password\": \"Password@123\",\n  \"role_id\": 2,\n  \"manager_id\": 2,\n  \"designation\": \"Developer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PUT /users/{id}",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Update a user (role, manager, active flag, optional new password)\n\nAccess: Super Admin",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Employee\",\n  \"email\": \"new@axentriq.com\",\n  \"role_id\": 2,\n  \"manager_id\": 2,\n  \"designation\": \"Developer\",\n  \"is_active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "GET /notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ],
+              "variable": []
+            },
+            "description": "My latest notifications + unread count\n\nAccess: Any authenticated user"
+          }
+        },
+        {
+          "name": "POST /notifications/read-all",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "read-all"
+              ],
+              "variable": []
+            },
+            "description": "Mark all as read\n\nAccess: Any authenticated user"
+          }
+        },
+        {
+          "name": "PATCH /notifications/{id}/read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/:id/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                ":id",
+                "read"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Mark one as read\n\nAccess: Any authenticated user"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "GET /reports/approval-history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/approval-history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "approval-history"
+              ],
+              "variable": []
+            },
+            "description": "Approval history of every request\n\nAccess: Super Admin"
+          }
+        },
+        {
+          "name": "GET /reports/audit-logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/audit-logs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "audit-logs"
+              ],
+              "variable": []
+            },
+            "description": "Audit trail\n\nAccess: Super Admin"
+          }
+        }
+      ]
+    }
+  ]
+}
