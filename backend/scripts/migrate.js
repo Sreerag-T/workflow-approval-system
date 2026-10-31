@@ -5,12 +5,20 @@ const mysql = require('mysql2/promise');
 
 (async () => {
   const { DB_HOST = '127.0.0.1', DB_PORT = 3306, DB_USER, DB_PASSWORD, DB_NAME = 'workflow_approval' } = process.env;
-  const root = await mysql.createConnection({ host: DB_HOST, port: DB_PORT, user: DB_USER, password: DB_PASSWORD });
-  await root.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
-  await root.end();
+  const ssl = process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined;
+
+  // Create the database if we are allowed to. Hosted MySQL (Aiven etc.) already
+  // provides one, so a failure here is not fatal.
+  try {
+    const root = await mysql.createConnection({ host: DB_HOST, port: DB_PORT, user: DB_USER, password: DB_PASSWORD, ssl });
+    await root.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
+    await root.end();
+  } catch (e) {
+    console.log('Skipping CREATE DATABASE:', e.message);
+  }
 
   const conn = await mysql.createConnection({
-    host: DB_HOST, port: DB_PORT, user: DB_USER, password: DB_PASSWORD, database: DB_NAME, multipleStatements: true,
+    host: DB_HOST, port: DB_PORT, user: DB_USER, password: DB_PASSWORD, database: DB_NAME, multipleStatements: true, ssl,
   });
   await conn.query('CREATE TABLE IF NOT EXISTS schema_migrations (name VARCHAR(100) PRIMARY KEY, applied_at DATETIME DEFAULT CURRENT_TIMESTAMP)');
   const dir = path.join(__dirname, '..', 'database', 'migrations');

@@ -10,6 +10,7 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   decimalNumbers: true, // DECIMAL columns come back as numbers
   timezone: 'Z',
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
 });
 
 // keep every session in UTC so dates are consistent
